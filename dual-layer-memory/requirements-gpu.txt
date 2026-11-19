@@ -1,0 +1,11 @@
+-r requirements.txt
+
+# Real-backbone stack (paper scale: 4 x NVIDIA H20 recommended).
+transformers>=4.51
+peft>=0.14
+accelerate>=1.0
+datasets>=2.19
+sentencepiece>=0.2
+
+# 4-bit loading for the 8B backbone on smaller GPUs (Linux/CUDA only).
+# bitsandbytes>=0.44

@@ -1,0 +1,9 @@
+# Core + analysis stack (CPU only, mock backend).
+numpy>=1.24
+PyYAML>=6.0
+matplotlib>=3.7
+torch>=2.2
+
+# Optional: a numpy fallback exists, but scikit-learn is faster/steadier
+# for the logistic-regression baseline.
+scikit-learn>=1.3

@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dlmem"
+version = "1.0.0"
+description = "Dual-Layer Agentic Memory: fast write routing and slow parametric consolidation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Dual-Layer Agentic Memory reproduction" }]
+keywords = ["llm-agents", "memory", "routing", "consolidation", "continual-learning"]
+dependencies = [
+  "numpy>=1.24",
+  "PyYAML>=6.0",
+  "matplotlib>=3.7",
+  "torch>=2.2",
+]
+
+[project.optional-dependencies]
+# scikit-learn is optional: a numpy logistic-regression fallback is included
+analysis = ["scikit-learn>=1.3", "pandas>=2.0"]
+hf = [
+  "transformers>=4.51",
+  "peft>=0.14",
+  "accelerate>=1.0",
+  "datasets>=2.19",
+  "sentencepiece>=0.2",
+]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+dlmem = "dlmem.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]

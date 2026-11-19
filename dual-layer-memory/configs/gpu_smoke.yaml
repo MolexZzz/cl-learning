@@ -1,0 +1,99 @@
+# Real-model, small-scale GPU smoke test (no simulator).
+#
+# Downloads Qwen3-0.6B / 1.7B and runs a few hundred ZsRE facts through the
+# complete pipeline.  Use it to validate a fresh GPU node before the
+# paper-scale run:
+#
+#   python -m dlmem.cli prepare  --config configs/gpu_smoke.yaml
+#   python -m dlmem.cli train    --config configs/gpu_smoke.yaml
+#   python -m dlmem.cli evaluate --config configs/gpu_smoke.yaml
+#
+# Expected: several minutes on one modern GPU, not hours.
+run_name: gpu_smoke
+seed: 13
+
+paths:
+  data_dir: data
+  out_dir: runs
+
+model:
+  small: Qwen/Qwen3-0.6B
+  large: Qwen/Qwen3-1.7B
+  dtype: bfloat16
+  device: auto
+  device_map: auto
+  feature_max_length: 128
+  qa_max_length: 384
+  prompt_batch_size: 8
+  generate_batch_size: 16
+  max_new_tokens: 12
+  trust_remote_code: true
+  attn_implementation: sdpa
+
+data:
+  zsre_path: data/zsre
+  m_probes: 30
+  max_facts: 400
+  splits: [0.7, 0.15, 0.15]
+
+labeling:
+  batch_size: 32
+  max_probes_per_fact: 0
+
+features:
+  batch_size: 16
+  interp_len: 64
+
+router:
+  hidden: 128
+  depth: 2
+  lr: 0.002
+  epochs: 25
+  batch_size: 128
+  lambda_s: 0.2
+  feature_mode: semantic_uncertainty
+  large_feature_mode: semantic_uncertainty
+  calibration: none
+
+gate:
+  hidden: 96
+  depth: 2
+  lr: 0.002
+  epochs: 25
+  batch_size: 128
+  feature_mode: full
+  supervision: train
+  oversample: 8
+
+cascade:
+  escalation_cap: 0.45
+
+eval:
+  episodes: 2
+  turns: 60
+  facts_per_episode: 10
+  top_k: 3
+  batch_episodes: 2
+  operating_points:
+    - {lambda_s: 0.2, lambda_e: 0.008}
+    - {lambda_s: 0.08, lambda_e: 0.005}
+
+sft:
+  enabled: true
+  source: test
+  epochs: 1
+  batch_size: 2
+  grad_accum: 4
+  max_length: 384
+  lora: true
+  relabel_train: true
+  relabel_facts: 0
+  max_examples: 2000
+
+ablation:
+  feature_modes: [semantic, semantic_uncertainty]
+  escalation_caps: [0.6]
+
+compute:
+  small_cost: 1.0
+  large_cost: 2.83   # 1.7B / 0.6B
